@@ -43,6 +43,7 @@ public class RegisterServlet extends HttpServlet {
             req.setAttribute("success", "Registration successful! Please wait for admin verification before logging in.");
             req.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(req, resp);
         } catch (Exception e) {
+            getServletContext().log("Registration failed: " + e.getMessage(), e);
             req.setAttribute("error", "Registration failed. Please try again.");
             req.setAttribute("user", user);
             req.getRequestDispatcher("/WEB-INF/jsp/register.jsp").forward(req, resp);

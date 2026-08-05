@@ -21,6 +21,9 @@ public class AuthService {
         if (user.getName() == null || user.getName().isBlank()) {
             return "Name is required.";
         }
+        if (user.getCollege() == null || user.getCollege().isBlank()) {
+            return "College name is required.";
+        }
         String normalizedEmail = user.getEmail() == null ? null : user.getEmail().trim().toLowerCase();
         if (!isValidCollegeEmail(normalizedEmail)) {
             return "Please use a valid college email address.";

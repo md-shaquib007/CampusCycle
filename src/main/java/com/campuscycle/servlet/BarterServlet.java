@@ -62,8 +62,12 @@ public class BarterServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/barter");
             } else if ("reject".equals(action)) {
                 int proposalId = Integer.parseInt(req.getParameter("proposalId"));
-                barterService.reject(proposalId);
-                req.getSession().setAttribute("flash", "Proposal rejected.");
+                String error = barterService.reject(proposalId, user.getId());
+                if (error != null) {
+                    req.getSession().setAttribute("flashError", error);
+                } else {
+                    req.getSession().setAttribute("flash", "Proposal rejected.");
+                }
                 resp.sendRedirect(req.getContextPath() + "/barter");
             }
         } catch (Exception e) {

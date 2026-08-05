@@ -36,10 +36,18 @@ public class ChatService {
         return chatRequestDAO.findForUser(userId);
     }
 
-    public void respond(int requestId, int sellerId, boolean accept) throws SQLException {
+    public String respond(int requestId, int sellerId, boolean accept) throws SQLException {
         Optional<ChatRequest> reqOpt = chatRequestDAO.findById(requestId);
-        if (reqOpt.isPresent() && reqOpt.get().getSellerId() == sellerId) {
-            chatRequestDAO.updateStatus(requestId, accept ? "ACCEPTED" : "REJECTED");
+        if (reqOpt.isEmpty()) {
+            return "Chat request not found.";
         }
+        if (reqOpt.get().getSellerId() != sellerId) {
+            return "You are not authorized to respond to this request.";
+        }
+        if (!"PENDING".equals(reqOpt.get().getStatus())) {
+            return "Chat request is no longer pending.";
+        }
+        chatRequestDAO.updateStatus(requestId, accept ? "ACCEPTED" : "REJECTED");
+        return null;
     }
 }

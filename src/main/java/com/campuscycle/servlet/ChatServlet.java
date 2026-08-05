@@ -53,8 +53,12 @@ public class ChatServlet extends HttpServlet {
             } else if ("respond".equals(action)) {
                 int requestId = Integer.parseInt(req.getParameter("requestId"));
                 boolean accept = "accept".equals(req.getParameter("decision"));
-                chatService.respond(requestId, user.getId(), accept);
-                req.getSession().setAttribute("flash", accept ? "Chat request accepted." : "Chat request rejected.");
+                String error = chatService.respond(requestId, user.getId(), accept);
+                if (error != null) {
+                    req.getSession().setAttribute("flashError", error);
+                } else {
+                    req.getSession().setAttribute("flash", accept ? "Chat request accepted." : "Chat request rejected.");
+                }
                 resp.sendRedirect(req.getContextPath() + "/chat");
             }
         } catch (Exception e) {

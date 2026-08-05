@@ -98,7 +98,20 @@ public class BarterService {
         return null;
     }
 
-    public void reject(int proposalId) throws SQLException {
+    public String reject(int proposalId, int userId) throws SQLException {
+        Optional<BarterProposal> proposalOpt = barterDAO.findById(proposalId);
+        if (proposalOpt.isEmpty()) {
+            return "Proposal not found.";
+        }
+        BarterProposal proposal = proposalOpt.get();
+        Optional<Listing> targetOpt = listingDAO.findById(proposal.getTargetListingId());
+        if (targetOpt.isEmpty() || targetOpt.get().getUserId() != userId) {
+            return "You are not authorized to reject this proposal.";
+        }
+        if (!"PENDING".equals(proposal.getStatus())) {
+            return "Proposal is no longer pending.";
+        }
         barterDAO.updateStatus(proposalId, "REJECTED");
+        return null;
     }
 }
