@@ -133,7 +133,7 @@ This verifies the health endpoint, public pages, login page, and unauthenticated
 2. Create a Render **Web Service** from the repository.
 3. Select **Docker** runtime; Render will use the root `Dockerfile`.
 4. Add `neonDbUrl` as a secret environment variable using Neon's pooled connection string with SSL enabled.
-5. Set the Render health check path to `/health`.
+5. Set the Render health check path to `/health/live`. Use `/health` separately to diagnose Neon and schema readiness.
 6. Deploy and run the smoke test above.
 
 The Docker image deploys the WAR as Tomcat `ROOT.war`, so the hosted URL is `/home`, not `/campuscycle/home`.
