@@ -13,7 +13,7 @@ public final class DBConnection {
 
     public static Connection getConnection() throws SQLException {
         String driver = AppConfig.get("db.driver", "org.postgresql.Driver");
-        String configuredUrl = AppConfig.get("db.url");
+        String configuredUrl = cleanConfiguredUrl(AppConfig.get("db.url"));
         String url = normalizeJdbcUrl(configuredUrl);
         String username = AppConfig.get("db.username");
         String password = AppConfig.get("db.password", "");
@@ -66,6 +66,20 @@ public final class DBConnection {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid PostgreSQL connection URL", e);
         }
+    }
+
+    private static String cleanConfiguredUrl(String url) {
+        if (url == null) {
+            return null;
+        }
+        String cleaned = url.trim();
+        if (cleaned.startsWith("neonDbUrl=")) {
+            cleaned = cleaned.substring("neonDbUrl=".length()).trim();
+        }
+        if (cleaned.length() >= 2 && cleaned.startsWith("\"") && cleaned.endsWith("\"")) {
+            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
+        }
+        return cleaned;
     }
 
     private static String appendQuery(String query, String parameter) {

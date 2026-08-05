@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class AuthService {
@@ -20,7 +21,8 @@ public class AuthService {
         if (user.getName() == null || user.getName().isBlank()) {
             return "Name is required.";
         }
-        if (user.getEmail() == null || !isValidCollegeEmail(user.getEmail())) {
+        String normalizedEmail = user.getEmail() == null ? null : user.getEmail().trim().toLowerCase();
+        if (!isValidCollegeEmail(normalizedEmail)) {
             return "Please use a valid college email address.";
         }
         if (plainPassword == null || plainPassword.length() < 6) {
@@ -30,7 +32,7 @@ public class AuthService {
             return "Email already registered.";
         }
 
-        user.setEmail(user.getEmail().toLowerCase().trim());
+        user.setEmail(normalizedEmail);
         user.setPasswordHash(PasswordUtil.hash(plainPassword));
         user.setRole(UserRole.STUDENT);
         user.setVerified(false);
@@ -88,7 +90,17 @@ public class AuthService {
         if (email == null || !email.contains("@")) {
             return false;
         }
-        String domain = AppConfig.get("college.email.domain", "@college.edu");
-        return email.toLowerCase().endsWith(domain.toLowerCase());
+        String configuredDomains = AppConfig.get(
+                "college.email.domains",
+                AppConfig.get("college.email.domain", "*"));
+        if ("*".equals(configuredDomains.trim())) {
+            return email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+        }
+        return Arrays.stream(configuredDomains.split(","))
+                .map(String::trim)
+                .filter(domain -> !domain.isBlank())
+                .map(domain -> domain.startsWith("@") ? domain : "@" + domain)
+                .map(String::toLowerCase)
+                .anyMatch(email.toLowerCase()::endsWith);
     }
 }

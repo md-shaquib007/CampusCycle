@@ -18,6 +18,7 @@ public class SustainabilityServlet extends HttpServlet {
         try {
             req.setAttribute("stats", sustainabilityDAO.getStats());
         } catch (Exception e) {
+            getServletContext().log("Sustainability data load failed: " + e.getMessage(), e);
             req.setAttribute("error", "Unable to load sustainability data.");
         }
         req.getRequestDispatcher("/WEB-INF/jsp/sustainability.jsp").forward(req, resp);

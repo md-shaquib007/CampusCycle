@@ -6,6 +6,7 @@ param(
 $base = $BaseUrl.TrimEnd('/')
 $checks = @(
     @{ Name = 'health'; Url = "$base/health"; Expected = 200 },
+    @{ Name = 'stylesheet'; Url = "$base/assets/style.css?v=4"; Expected = 200 },
     @{ Name = 'home'; Url = "$base/home"; Expected = 200 },
     @{ Name = 'listings'; Url = "$base/listings"; Expected = 200 },
     @{ Name = 'login'; Url = "$base/login"; Expected = 200 },

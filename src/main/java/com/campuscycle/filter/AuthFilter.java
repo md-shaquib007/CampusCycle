@@ -13,7 +13,7 @@ import java.util.Set;
 public class AuthFilter implements Filter {
     private static final Set<String> PUBLIC_PATHS = Set.of(
             "/", "/home", "/login", "/register", "/forgot-password", "/reset-password",
-            "/listings", "/listing", "/sustainability", "/health", "/css/", "/uploads/", "/error"
+            "/listings", "/listing", "/sustainability", "/health", "/assets/", "/css/", "/uploads/", "/error"
     );
 
     private static final Set<String> PROTECTED_PREFIXES = Set.of(

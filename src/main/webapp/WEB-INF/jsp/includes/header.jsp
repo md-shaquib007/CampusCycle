@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><c:out value="${pageTitle != null ? pageTitle : 'CampusCycle'}"/> – Student Marketplace</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2">
+    <c:url var="styleUrl" value="/assets/style.css"/>
+    <link rel="stylesheet" href="${styleUrl}?v=4">
 </head>
 <body>
 <nav class="navbar">

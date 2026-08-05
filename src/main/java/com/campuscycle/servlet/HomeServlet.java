@@ -36,6 +36,7 @@ public class HomeServlet extends HttpServlet {
             req.setAttribute("stats", stats);
             req.setAttribute("listingTypes", ListingType.values());
         } catch (Exception e) {
+            getServletContext().log("Marketplace data load failed: " + e.getMessage(), e);
             req.setAttribute("error", "Unable to load marketplace data. Please check database connection.");
         }
         req.getRequestDispatcher("/WEB-INF/jsp/home.jsp").forward(req, resp);

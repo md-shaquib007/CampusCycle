@@ -96,7 +96,7 @@ For local development, copy `src/main/resources/db.properties.example` to `db.pr
 db.url=jdbc:postgresql://localhost:5432/campuscycle?sslmode=disable
 db.username=postgres
 db.password=your_password
-college.email.domain=@college.edu
+college.email.domains=*
 ```
 
 ### 3. Build

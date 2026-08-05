@@ -9,4 +9,4 @@ neonDbUrl=postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require&channel_binding
 
 upload.path=uploads
 upload.maxSize=5242880
-college.email.domain=@college.edu
+college.email.domains=*

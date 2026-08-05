@@ -45,6 +45,7 @@ public class ListingServlet extends HttpServlet {
             req.setAttribute("currentPage", filter.getOffset() / PAGE_SIZE + 1);
             req.setAttribute("filter", filter);
         } catch (Exception e) {
+            getServletContext().log("Listings data load failed: " + e.getMessage(), e);
             req.setAttribute("error", "Unable to load listings.");
         }
         req.getRequestDispatcher("/WEB-INF/jsp/listings.jsp").forward(req, resp);
