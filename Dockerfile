@@ -15,4 +15,4 @@ COPY --from=build /app/target/campuscycle.war /usr/local/tomcat/webapps/ROOT.war
 ENV PORT=10000
 EXPOSE 10000
 
-CMD ["sh", "-c", "sed -i \"s/port=\\\"8080\\\"/port=\\\"${PORT}\\\"/\" /usr/local/tomcat/conf/server.xml && catalina.sh run"]
+CMD ["sh", "-c", "sed -i -e \"s/port=\\\"8005\\\"/port=\\\"-1\\\"/\" -e \"s/port=\\\"8080\\\"/port=\\\"${PORT}\\\"/\" /usr/local/tomcat/conf/server.xml && catalina.sh run"]
