@@ -5,14 +5,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><c:out value="${pageTitle != null ? pageTitle : 'CampusCycle'}"/> – Student Marketplace</title>
+    <title><c:out value="${pageTitle != null ? pageTitle : 'CampusCycle'}"/> &#8211; Student Marketplace</title>
     <c:url var="styleUrl" value="/assets/style.css"/>
     <link rel="stylesheet" href="${styleUrl}?v=4">
 </head>
 <body>
 <nav class="navbar">
     <div class="container nav-inner">
-        <a href="${pageContext.request.contextPath}/home" class="logo">🔄 Campus<span>Cycle</span></a>
+        <a href="${pageContext.request.contextPath}/home" class="logo">&#128279; Campus<span>Cycle</span></a>
         <div class="nav-links">
             <a href="${pageContext.request.contextPath}/home">Home</a>
             <a href="${pageContext.request.contextPath}/listings">Browse</a>

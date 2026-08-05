@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="pageTitle" value="Admin Dashboard"/>
-<jsp:include page="includes/header.jsp"/>
+<jsp:include page="../includes/header.jsp"/>
 
 <div class="container" style="padding:2rem 0;">
     <h1 class="section-title">Admin Dashboard</h1>
@@ -154,4 +154,4 @@
     </div>
 </div>
 
-<jsp:include page="includes/footer.jsp"/>
+<jsp:include page="../includes/footer.jsp"/>
