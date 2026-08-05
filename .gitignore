@@ -1,0 +1,12 @@
+target/
+.env
+src/main/resources/db.properties
+!src/main/resources/db.properties.example
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.class
+HashGen.java
+HashGen.class

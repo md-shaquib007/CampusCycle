@@ -1,0 +1,12 @@
+# Copy to db.properties for local use, or set neonDbUrl in the deployment environment.
+# Never commit a real Neon URL or password.
+neonDbUrl=postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require&channel_binding=require
+
+# Optional local fallback:
+# db.url=jdbc:postgresql://localhost:5432/campuscycle?sslmode=disable
+# db.username=postgres
+# db.password=postgres
+
+upload.path=uploads
+upload.maxSize=5242880
+college.email.domain=@college.edu
