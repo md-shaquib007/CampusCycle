@@ -1,8 +1,10 @@
 # CampusCycle – Student Marketplace & Barter Exchange Platform
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen) ![Java](https://img.shields.io/badge/java-21-orange) ![Servlets](https://img.shields.io/badge/servlet-4.0.1-blue) ![PostgreSQL](https://img.shields.io/badge/postgresql-15-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen) ![Java](https://img.shields.io/badge/java-21-orange) ![Servlets](https://img.shields.io/badge/servlet-4.0.1-blue) ![PostgreSQL](https://img.shields.io/badge/postgresql-15-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Vercel](https://img.shields.io/badge/vercel-ready-black) ![Docker](https://img.shields.io/badge/docker-ready-blue)
 
 **Tagline:** *Reuse. Exchange. Save Money. Build a Sustainable Campus.*
+
+![CampusCycle Marketplace Preview](docs/preview.png)
 
 CampusCycle is a college-exclusive marketplace where verified students can **sell**, **buy**, **donate**, or **barter** items securely. Unlike traditional marketplaces, it encourages a circular campus economy through barter exchanges, donations, and sustainability tracking.
 
@@ -41,8 +43,8 @@ sequenceDiagram
 | **View Engine** | JSP + JSTL, CSS3, JavaScript |
 | **Database** | PostgreSQL (Neon / Docker) |
 | **Architecture** | MVC + Data Access Object (DAO) Pattern |
-| **Testing** | JUnit 5, Mockito, Surefire |
-| **Containers** | Docker Multi-Stage, Docker Compose, Tomcat 9 |
+| **Testing** | JUnit 5, Mockito, Surefire, H2 (In-Memory) |
+| **Containers & Deployment** | Docker Multi-Stage, Docker Compose, Tomcat 9, Vercel (`vercel.json`) |
 
 ---
 
@@ -58,7 +60,15 @@ sequenceDiagram
 
 ## Setup & Deployment
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Vercel Deployment (Static Web Assets)
+
+CampusCycle includes a custom `vercel.json` for web asset hosting on Vercel:
+
+1. Import the repository into [Vercel Dashboard](https://vercel.com/new).
+2. Set Root Directory to `CampusCycle`.
+3. Deploy!
+
+### Option 2: Docker Compose (Full Stack Tomcat + PostgreSQL)
 
 Run application and PostgreSQL container with 1 command:
 
@@ -67,13 +77,13 @@ docker compose up --build -d
 ```
 Access at `http://localhost:10000/`.
 
-### Option 2: Local Manual Setup
+### Option 3: Local Manual Setup
 
 #### 1. Database
 Run `sql/schema.sql` on your local PostgreSQL database.
 
 #### 2. Configuration
-Set environment variables:
+`DBConnection` automatically detects environment variables (`DB_URL`, `DB_USER`, `DB_PASSWORD`). Set environment variables:
 ```bash
 export DB_URL="jdbc:postgresql://localhost:5432/campuscycle"
 export DB_USER="postgres"
