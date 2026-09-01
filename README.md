@@ -1,24 +1,35 @@
 # CampusCycle – Student Marketplace & Barter Exchange Platform
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen) ![Java](https://img.shields.io/badge/java-21-orange) ![Servlets](https://img.shields.io/badge/servlet-4.0.1-blue) ![PostgreSQL](https://img.shields.io/badge/postgresql-15-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+
 **Tagline:** *Reuse. Exchange. Save Money. Build a Sustainable Campus.*
 
 CampusCycle is a college-exclusive marketplace where verified students can **sell**, **buy**, **donate**, or **barter** items securely. Unlike traditional marketplaces, it encourages a circular campus economy through barter exchanges, donations, and sustainability tracking.
 
 ---
 
-## Problem Statement
+## Barter Exchange Architecture
 
-Every semester, students discard usable textbooks, calculators, lab equipment, hostel furniture, and more — while new students buy the same items at full price. Today this happens through scattered WhatsApp groups with no trust, tracking, or sustainability impact.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor StudentA as Student A (Proposer)
+    participant App as CampusCycle Web App
+    participant DB as PostgreSQL DB
+    actor StudentB as Student B (Item Owner)
 
-## Solution
-
-A verified, campus-only platform with:
-- Multiple listing types: **Sell**, **Buy Request**, **Barter**, **Donate**
-- **Barter Engine** for item-for-item exchanges
-- **Donation Corner** for free giveaways
-- **Chat Requests** (accept/reject, then reveal contact info)
-- **Sustainability Dashboard** showing reuse impact
-- **Admin moderation** for users, listings, and reports
+    StudentA->>App: Submits Barter Proposal (Offers Item A for Item B)
+    App->>DB: Save Proposal (Status: PENDING)
+    App-->>StudentB: Notify via Chat / Proposal Dashboard
+    alt Proposal Accepted
+        StudentB->>App: Accept Proposal
+        App->>DB: Update Proposal (Status: ACCEPTED) & Update Listings
+        App-->>StudentA: Reveal Contact Details & Exchange Instructions
+    else Proposal Rejected
+        StudentB->>App: Reject Proposal
+        App->>DB: Update Proposal (Status: REJECTED)
+    end
+```
 
 ---
 
@@ -26,203 +37,73 @@ A verified, campus-only platform with:
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Java Servlets |
-| View | JSP + JSTL |
-| Database | PostgreSQL (Neon) + JDBC |
-| Architecture | MVC + DAO Pattern |
-| Auth | Session-based + BCrypt |
-| File Upload | Apache Commons FileUpload |
-| Build | Maven (WAR) |
-| Server | Apache Tomcat 9+ |
-
-### Technical Features Demonstrated
-- Servlet & JSP lifecycle
-- JDBC with Prepared Statements
-- MVC layered architecture (Model → DAO → Service → Servlet → JSP)
-- Session management & role-based access control
-- File upload & image storage
-- PostgreSQL-compatible schema and Neon deployment
-- `/health` database readiness endpoint
-- Pagination, search & filtering
-- Form validation
-- Transaction recording
+| **Backend** | Java Servlets (Java 21), Session-based Auth, JDBC |
+| **View Engine** | JSP + JSTL, CSS3, JavaScript |
+| **Database** | PostgreSQL (Neon / Docker) |
+| **Architecture** | MVC + Data Access Object (DAO) Pattern |
+| **Testing** | JUnit 5, Mockito, Surefire |
+| **Containers** | Docker Multi-Stage, Docker Compose, Tomcat 9 |
 
 ---
 
-## Project Structure
+## Features
 
-```
-CampusCycle/
-├── pom.xml
-├── sql/schema.sql
-└── src/main/
-    ├── java/com/campuscycle/
-    │   ├── model/       # Entity classes & enums
-    │   ├── dao/         # Data Access Objects
-    │   ├── service/     # Business logic
-    │   ├── servlet/     # Controllers
-    │   ├── filter/      # Auth & admin filters
-    │   └── util/        # DB, password, file upload helpers
-    ├── resources/db.properties
-    └── webapp/
-        ├── css/style.css
-        ├── uploads/
-        └── WEB-INF/jsp/
-```
+- **Listing Types** – **Sell**, **Buy Request**, **Barter Exchange**, **Donation Corner**
+- **Barter Engine** – Item-for-item trade proposal workflow
+- **Sustainability Dashboard** – Tracks money saved, items reused, and waste prevented
+- **Student Verification** – Session auth with BCrypt password hashing
+- **Admin Moderation** – Report flagging and listing moderation
 
 ---
 
-## Setup Instructions
+## Setup & Deployment
 
-### Prerequisites
-- Java 17+
-- Apache Maven 3.8+
-- PostgreSQL 15+ or a Neon database
-- Apache Tomcat 9+
+### Option 1: Docker Compose (Recommended)
 
-### 1. Database Setup
+Run application and PostgreSQL container with 1 command:
 
 ```bash
-psql "$neonDbUrl" -f sql/schema.sql
+docker compose up --build -d
+```
+Access at `http://localhost:10000/`.
+
+### Option 2: Local Manual Setup
+
+#### 1. Database
+Run `sql/schema.sql` on your local PostgreSQL database.
+
+#### 2. Configuration
+Set environment variables:
+```bash
+export DB_URL="jdbc:postgresql://localhost:5432/campuscycle"
+export DB_USER="postgres"
+export DB_PASSWORD="your_password"
 ```
 
-The same `sql/schema.sql` works in the Neon SQL Editor. Connect to the target Neon database before running it.
-
-### 2. Configure Database
-
-For local development, copy `src/main/resources/db.properties.example` to `db.properties`. For Render, add only the `neonDbUrl` environment variable using the connection string copied from Neon. The application accepts both Neon's `postgresql://...` format and JDBC format and adds the JDBC prefix automatically. Never commit `db.properties` or a real connection string.
-
-```properties
-db.url=jdbc:postgresql://localhost:5432/campuscycle?sslmode=disable
-db.username=postgres
-db.password=your_password
-college.email.domains=*
+#### 3. Build & Test
+```bash
+mvn clean test package
 ```
+Deploy `target/campuscycle.war` to Apache Tomcat 9/10.
 
-### 3. Build
+---
+
+## Testing
+
+Run unit tests locally:
 
 ```bash
-mvn clean package
+mvn test
 ```
 
-Deploy `target/campuscycle.war` to Tomcat's `webapps/` folder.
-
-### 4. Run
-
-Start Tomcat and open: `http://localhost:8080/campuscycle/home`
-
-Check database readiness at `/health`. A healthy response is:
-
-```json
-{"status":"ok","database":"ok"}
-```
-
-### End-to-end smoke test
-
-After deploying, run:
-
-```powershell
-.\scripts\smoke-test.ps1 -BaseUrl https://your-service.onrender.com
-```
-
-This verifies the health endpoint, public pages, login page, and unauthenticated access protection.
-
-### Render deployment
-
-1. Push the repository to GitHub.
-2. Create a Render **Web Service** from the repository.
-3. Select **Docker** runtime; Render will use the root `Dockerfile`.
-4. Add `neonDbUrl` as a secret environment variable using Neon's pooled connection string with SSL enabled.
-5. Set the Render health check path to `/health/live`. Use `/health` separately to diagnose Neon and schema readiness.
-6. Deploy and run the smoke test above.
-
-The Docker image deploys the WAR as Tomcat `ROOT.war`, so the hosted URL is `/home`, not `/campuscycle/home`.
-
-### Default Admin Account
-| Field | Value |
-|-------|-------|
-| Email | `admin@college.edu` |
-| Password | `admin123` |
-
----
-
-## User Roles
-
-### Student
-- Buy, sell, barter, donate items
-- Save wishlist favorites
-- Send chat requests to sellers
-- Propose barter exchanges
-- Report suspicious listings
-- View profile & transaction history
-
-### Admin
-- Verify new student registrations
-- Approve/reject listings
-- Moderate fraud reports
-- Suspend spam accounts
-- View platform analytics
-
----
-
-## Key Features
-
-### Listing Types
-| Type | Example |
-|------|---------|
-| Sell | "Scientific Calculator – ₹400" |
-| Buy Request | "Looking for Java textbooks" |
-| Barter | "Calculator for Java Books" |
-| Donate | "Free hostel mattress" |
-
-### Barter Engine ⭐
-Student A offers a Java Book → Student B offers a Calculator → Both accept → Transaction complete.
-
-### Smart Search & Filters
-Search by item, course, semester, category, seller. Filter by: Free, Donation, Exchange, Under ₹500, Hostel, Recently Added.
-
-### Sustainability Dashboard
-Tracks items reused, money saved, waste prevented, donations, and barter deals.
-
----
-
-## API / URL Map
-
-| URL | Description |
-|-----|-------------|
-| `/home` | Landing page with recent listings |
-| `/listings` | Browse & search marketplace |
-| `/listing?id=` | Listing detail |
-| `/listing/create` | Create new listing |
-| `/register` | Student registration |
-| `/login` | Login |
-| `/profile` | User profile & my listings |
-| `/barter` | Barter proposals |
-| `/chat` | Chat requests |
-| `/sustainability` | Impact dashboard |
-| `/admin/dashboard` | Admin panel |
-
----
-
-## Future Enhancements
-
-- QR code verification during item exchange
-- Real-time chat using WebSocket
-- AI-powered item price suggestions
-- AI image moderation for inappropriate uploads
-- Email notifications
-- Mobile application
-- Digital wallet for campus credits
-- Campus points for donations
-
----
-
-## Why This Project Stands Out
-
-Most marketplace projects stop at buying and selling. CampusCycle introduces **barter exchanges**, **donations**, and **sustainability metrics** — solving a genuine student problem while demonstrating strong Java EE concepts: Servlets, JSP, JDBC, MVC, session management, file handling, search, filtering, and multi-role authorization.
+Test coverage includes:
+- `ListingTest`: Free item rules (`DONATE` / price = 0) & property getters/setters.
+- `PasswordUtilTest`: BCrypt password hashing & verification.
+- `DBConnectionTest`: Connection pool configuration & error handling.
+- `TokenUtilTest`: Token generation logic.
 
 ---
 
 ## License
 
-Educational / Portfolio project.
+Educational / Portfolio project under MIT License.

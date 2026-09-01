@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: campuscycle-db
+    environment:
+      POSTGRES_DB: campuscycle
+      POSTGRES_USER: campus_user
+      POSTGRES_PASSWORD: campus_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campus_user -d campuscycle"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: campuscycle-app
+    ports:
+      - "10000:10000"
+    environment:
+      PORT: 10000
+      DB_URL: jdbc:postgresql://db:5432/campuscycle
+      DB_USER: campus_user
+      DB_PASSWORD: campus_password
+    depends_on:
+      db:
+        condition: service_healthy
