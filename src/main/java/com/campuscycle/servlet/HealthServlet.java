@@ -1,6 +1,7 @@
 package com.campuscycle.servlet;
 
 import com.campuscycle.util.DBConnection;
+import com.google.gson.Gson;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -10,31 +11,49 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
-@WebServlet("/health")
+@WebServlet(urlPatterns = {"/api/health"})
 public class HealthServlet extends HttpServlet {
+
+    private static final long START_TIME = System.currentTimeMillis();
+    private static final Gson gson = new Gson();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT to_regclass('public.users'), "
-                             + "to_regclass('public.listings'), "
-                             + "to_regclass('public.transactions')");
-             ResultSet result = statement.executeQuery()) {
-            if (!result.next() || result.getString(1) == null
-                    || result.getString(2) == null || result.getString(3) == null) {
-                resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-                resp.getWriter().write("{\"status\":\"degraded\",\"database\":\"ok\",\"schema\":\"missing\"}");
-                return;
+        Map<String, Object> health = new HashMap<>();
+        health.put("status", "UP");
+        health.put("service", "CampusCycle Marketplace");
+        health.put("timestamp", Instant.now().toString());
+        health.put("uptimeMs", System.currentTimeMillis() - START_TIME);
+
+        Map<String, Object> details = new HashMap<>();
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT 1");
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                details.put("database", Map.of("status", "UP", "database", conn.getMetaData().getDatabaseProductName()));
             }
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write("{\"status\":\"ok\",\"database\":\"ok\",\"schema\":\"ok\"}");
         } catch (Exception e) {
-            getServletContext().log("Database health check failed: " + e.getMessage(), e);
-            resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            resp.getWriter().write("{\"status\":\"degraded\",\"database\":\"unavailable\"}");
+            health.put("status", "DOWN");
+            details.put("database", Map.of("status", "DOWN", "error", e.getMessage()));
         }
+
+        Runtime runtime = Runtime.getRuntime();
+        details.put("memory", Map.of(
+                "totalMB", runtime.totalMemory() / (1024 * 1024),
+                "freeMB", runtime.freeMemory() / (1024 * 1024),
+                "usedMB", (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024),
+                "maxMB", runtime.maxMemory() / (1024 * 1024)
+        ));
+
+        health.put("components", details);
+
+        resp.setContentType("application/json");
+        resp.setStatus("UP".equals(health.get("status")) ? 200 : 503);
+        resp.getWriter().write(gson.toJson(health));
     }
 }
