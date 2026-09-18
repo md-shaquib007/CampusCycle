@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusCycle – Student Marketplace & Barter Exchange</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .badge-type {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .type-sell { background: #e8f5e9; color: #2e7d32; }
+        .type-barter { background: #fff3e0; color: #e65100; }
+        .type-donate { background: #e1f5fe; color: #0277bd; }
+        .type-buy { background: #f3e5f5; color: #7b1fa2; }
+        .sustainability-banner {
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-inner">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-recycle"></i> Campus<span>Cycle</span>
+            </a>
+            <div class="nav-links">
+                <a href="#browse"><i class="fa-solid fa-store"></i> Browse Items</a>
+                <a href="#barter"><i class="fa-solid fa-handshake"></i> Barter Exchange</a>
+                <a href="#impact"><i class="fa-solid fa-leaf"></i> Sustainability</a>
+                <a href="api/health" target="_blank" style="font-size:0.85rem; padding:0.3rem 0.7rem; background:#e8f5e9; border-radius:12px; color:var(--primary-dark);">
+                    <i class="fa-solid fa-heart-pulse"></i> API Status
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Campus Student Marketplace & Barter Exchange</h1>
+            <p>Reuse textbooks, exchange lab equipment, barter dorm items, and build a sustainable campus economy together.</p>
+        </div>
+    </section>
+
+    <main class="container">
+        <!-- Campus Sustainability Stats -->
+        <div class="sustainability-banner" id="impact">
+            <div class="stat-item"><i class="fa-solid fa-recycle fa-lg"></i> 1,483 Items Reused</div>
+            <div class="stat-item"><i class="fa-solid fa-piggy-bank fa-lg"></i> $21,950 Student Savings</div>
+            <div class="stat-item"><i class="fa-solid fa-tree fa-lg"></i> 1.8 Tons CO2 Reduced</div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" id="browse">
+            <button class="filter-btn active" onclick="filterItems('ALL')">All Listings</button>
+            <button class="filter-btn" onclick="filterItems('BARTER')"><i class="fa-solid fa-handshake"></i> Barter</button>
+            <button class="filter-btn" onclick="filterItems('SELL')"><i class="fa-solid fa-tag"></i> For Sale</button>
+            <button class="filter-btn" onclick="filterItems('DONATE')"><i class="fa-solid fa-gift"></i> Free / Donate</button>
+            <button class="filter-btn" onclick="filterItems('BUY')"><i class="fa-solid fa-magnifying-glass"></i> Buying Requests</button>
+        </div>
+
+        <!-- Items Grid -->
+        <div class="grid" id="itemsGrid">
+            <!-- Dynamic / Pre-rendered Product Cards -->
+            <div class="card" data-type="BARTER">
+                <div class="card-img" style="background:#e0f2fe; font-size:3rem; color:#0284c7;">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <div style="padding:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <span class="badge-type type-barter">Barter Trade</span>
+                        <span style="font-weight:700; color:var(--primary-dark);">Exchange</span>
+                    </div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">Macroeconomics Textbook</h3>
+                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">9th Edition. Seeking Organic Chemistry notes or lab coat in trade.</p>
+                    <button onclick="openBarterModal('Macroeconomics Textbook')" style="width:100%; padding:0.5rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
+                        Propose Barter
+                    </button>
+                </div>
+            </div>
+
+            <div class="card" data-type="SELL">
+                <div class="card-img" style="background:#fef3c7; font-size:3rem; color:#d97706;">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div style="padding:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <span class="badge-type type-sell">For Sale</span>
+                        <span style="font-weight:700; color:var(--primary-dark);">$45</span>
+                    </div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">TI-84 Plus CE Calculator</h3>
+                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">Color graphing calculator in excellent condition with charger cable.</p>
+                    <button onclick="alert('Connect to backend API to buy item')" style="width:100%; padding:0.5rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
+                        Contact Seller
+                    </button>
+                </div>
+            </div>
+
+            <div class="card" data-type="DONATE">
+                <div class="card-img" style="background:#f0fdf4; font-size:3rem; color:#16a34a;">
+                    <i class="fa-solid fa-flask-vial"></i>
+                </div>
+                <div style="padding:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <span class="badge-type type-donate">Free Donation</span>
+                        <span style="font-weight:700; color:#16a34a;">FREE</span>
+                    </div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">Chemistry Lab Coat (Size M)</h3>
+                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">Clean white lab coat, no stains. Free to any first-year STEM student.</p>
+                    <button onclick="alert('Claimed! Contact donor via campus email.')" style="width:100%; padding:0.5rem; background:#16a34a; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
+                        Claim Donation
+                    </button>
+                </div>
+            </div>
+
+            <div class="card" data-type="BARTER">
+                <div class="card-img" style="background:#fae8ff; font-size:3rem; color:#c026d3;">
+                    <i class="fa-solid fa-chair"></i>
+                </div>
+                <div style="padding:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <span class="badge-type type-barter">Barter Trade</span>
+                        <span style="font-weight:700; color:var(--primary-dark);">Exchange</span>
+                    </div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">Ergonomic Dorm Desk Chair</h3>
+                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">Mesh back support. Will exchange for desk lamp or monitor stand.</p>
+                    <button onclick="openBarterModal('Ergonomic Dorm Desk Chair')" style="width:100%; padding:0.5rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
+                        Propose Barter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Barter Proposal Modal -->
+    <div class="modal-overlay" id="barterModal">
+        <div class="modal-card">
+            <h3 style="margin-bottom:0.5rem; color:var(--primary-dark);"><i class="fa-solid fa-handshake"></i> Propose Barter Trade</h3>
+            <p style="font-size:0.9rem; color:var(--muted); margin-bottom:1rem;" id="modalItemTarget"></p>
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.3rem;">What item will you offer in exchange?</label>
+                <input type="text" placeholder="e.g. Organic Chemistry Notes & Flashcards" style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:6px;">
+            </div>
+            <div style="margin-bottom:1.5rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.3rem;">Message to Seller</label>
+                <textarea rows="3" placeholder="I can meet up at the Campus Student Union tomorrow afternoon!" style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:6px;"></textarea>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                <button onclick="closeBarterModal()" style="padding:0.5rem 1rem; background:#f1f5f9; border:none; border-radius:6px; cursor:pointer;">Cancel</button>
+                <button onclick="submitBarter()" style="padding:0.5rem 1rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Submit Proposal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterItems(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const cards = document.querySelectorAll('#itemsGrid .card');
+            cards.forEach(card => {
+                if (type === 'ALL' || card.dataset.type === type) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function openBarterModal(itemName) {
+            document.getElementById('modalItemTarget').innerText = "Proposing trade for: " + itemName;
+            document.getElementById('barterModal').classList.add('open');
+        }
+
+        function closeBarterModal() {
+            document.getElementById('barterModal').classList.remove('open');
+        }
+
+        function submitBarter() {
+            alert('Barter Proposal Sent Successfully!');
+            closeBarterModal();
+        }
+    </script>
+</body>
+</html>
