@@ -9,48 +9,53 @@
     <style>
         .badge-type {
             display: inline-block;
-            padding: 0.25rem 0.6rem;
+            padding: 0.25rem 0.65rem;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
         }
-        .type-sell { background: #e8f5e9; color: #2e7d32; }
-        .type-barter { background: #fff3e0; color: #e65100; }
-        .type-donate { background: #e1f5fe; color: #0277bd; }
-        .type-buy { background: #f3e5f5; color: #7b1fa2; }
+        .type-SELL { background: #e3f2fd; color: #1565c0; }
+        .type-BARTER { background: #fff3e0; color: #e65100; }
+        .type-DONATE { background: #e8f5e9; color: #1b7a4e; }
+        .type-BUY { background: #f3e5f5; color: #7b1fa2; }
+
         .sustainability-banner {
             background: #e8f5e9;
             border: 1px solid #c8e6c9;
             border-radius: var(--radius);
-            padding: 1rem 1.5rem;
+            padding: 1.25rem 1.5rem;
             margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: space-around;
             gap: 1rem;
             flex-wrap: wrap;
         }
         .stat-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
+            gap: 0.6rem;
+            font-weight: 700;
+            font-size: 1.05rem;
             color: var(--primary-dark);
         }
+
         .filter-bar {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
+            align-items: center;
         }
         .filter-btn {
-            padding: 0.5rem 1rem;
+            padding: 0.55rem 1.1rem;
             border: 1px solid var(--border);
             border-radius: 20px;
             background: white;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 0.9rem;
             transition: all 0.2s;
         }
         .filter-btn.active, .filter-btn:hover {
@@ -58,23 +63,53 @@
             color: white;
             border-color: var(--primary);
         }
+
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.55);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(3px);
         }
         .modal-overlay.open { display: flex; }
         .modal-card {
             background: white;
             padding: 2rem;
             border-radius: var(--radius);
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 550px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            background: transparent;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--muted);
+        }
+
+        .card-footer-btns {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .btn-action {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+            text-align: center;
         }
     </style>
 </head>
@@ -87,10 +122,12 @@
                 <i class="fa-solid fa-recycle"></i> Campus<span>Cycle</span>
             </a>
             <div class="nav-links">
-                <a href="#browse"><i class="fa-solid fa-store"></i> Browse Items</a>
-                <a href="#barter"><i class="fa-solid fa-handshake"></i> Barter Exchange</a>
+                <a href="#browse"><i class="fa-solid fa-store"></i> Browse Marketplace</a>
                 <a href="#impact"><i class="fa-solid fa-leaf"></i> Sustainability</a>
-                <a href="api/health" target="_blank" style="font-size:0.85rem; padding:0.3rem 0.7rem; background:#e8f5e9; border-radius:12px; color:var(--primary-dark);">
+                <button onclick="openPostModal()" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-plus"></i> Post Listing
+                </button>
+                <a href="api/health" target="_blank" style="font-size:0.85rem; padding:0.35rem 0.75rem; background:#e8f5e9; border-radius:12px; color:var(--primary-dark); font-weight:600;">
                     <i class="fa-solid fa-heart-pulse"></i> API Status
                 </a>
             </div>
@@ -101,148 +138,399 @@
     <section class="hero">
         <div class="container">
             <h1>Campus Student Marketplace & Barter Exchange</h1>
-            <p>Reuse textbooks, exchange lab equipment, barter dorm items, and build a sustainable campus economy together.</p>
+            <p>Reuse textbooks, trade lab gear, exchange dorm items, and save money together on campus.</p>
         </div>
     </section>
 
     <main class="container">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search textbooks, calculators, lab coats, dorm chairs..." onkeyup="applyFilters()">
+            <select id="categorySelect" onchange="applyFilters()">
+                <option value="ALL">All Categories</option>
+                <option value="Textbooks">Textbooks & Notes</option>
+                <option value="Lab Equipment">Lab Equipment</option>
+                <option value="Electronics">Electronics & Calculators</option>
+                <option value="Furniture">Dorm Furniture & Decor</option>
+                <option value="Stationery">Stationery & Art Supplies</option>
+            </select>
+        </div>
+
         <!-- Campus Sustainability Stats -->
         <div class="sustainability-banner" id="impact">
-            <div class="stat-item"><i class="fa-solid fa-recycle fa-lg"></i> 1,483 Items Reused</div>
-            <div class="stat-item"><i class="fa-solid fa-piggy-bank fa-lg"></i> $21,950 Student Savings</div>
-            <div class="stat-item"><i class="fa-solid fa-tree fa-lg"></i> 1.8 Tons CO2 Reduced</div>
+            <div class="stat-item"><i class="fa-solid fa-recycle fa-xl" style="color:var(--primary);"></i> <span>1,483 Items Reused</span></div>
+            <div class="stat-item"><i class="fa-solid fa-piggy-bank fa-xl" style="color:#e65100;"></i> <span>$21,950 Student Savings</span></div>
+            <div class="stat-item"><i class="fa-solid fa-tree fa-xl" style="color:#27ae60;"></i> <span>1.8 Tons CO₂ Avoided</span></div>
         </div>
 
         <!-- Filter Bar -->
         <div class="filter-bar" id="browse">
-            <button class="filter-btn active" onclick="filterItems('ALL')">All Listings</button>
-            <button class="filter-btn" onclick="filterItems('BARTER')"><i class="fa-solid fa-handshake"></i> Barter</button>
-            <button class="filter-btn" onclick="filterItems('SELL')"><i class="fa-solid fa-tag"></i> For Sale</button>
-            <button class="filter-btn" onclick="filterItems('DONATE')"><i class="fa-solid fa-gift"></i> Free / Donate</button>
-            <button class="filter-btn" onclick="filterItems('BUY')"><i class="fa-solid fa-magnifying-glass"></i> Buying Requests</button>
+            <button class="filter-btn active" onclick="setFilterType('ALL', this)">All Listings</button>
+            <button class="filter-btn" onclick="setFilterType('BARTER', this)"><i class="fa-solid fa-handshake"></i> Barter Exchange</button>
+            <button class="filter-btn" onclick="setFilterType('SELL', this)"><i class="fa-solid fa-tag"></i> For Sale</button>
+            <button class="filter-btn" onclick="setFilterType('DONATE', this)"><i class="fa-solid fa-gift"></i> Free / Donate</button>
+            <button class="filter-btn" onclick="setFilterType('BUY', this)"><i class="fa-solid fa-magnifying-glass"></i> Buying Wanted</button>
         </div>
 
         <!-- Items Grid -->
         <div class="grid" id="itemsGrid">
-            <!-- Dynamic / Pre-rendered Product Cards -->
-            <div class="card" data-type="BARTER">
-                <div class="card-img" style="background:#e0f2fe; font-size:3rem; color:#0284c7;">
-                    <i class="fa-solid fa-book"></i>
-                </div>
-                <div style="padding:1rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                        <span class="badge-type type-barter">Barter Trade</span>
-                        <span style="font-weight:700; color:var(--primary-dark);">Exchange</span>
-                    </div>
-                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">Macroeconomics Textbook</h3>
-                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">9th Edition. Seeking Organic Chemistry notes or lab coat in trade.</p>
-                    <button onclick="openBarterModal('Macroeconomics Textbook')" style="width:100%; padding:0.5rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
-                        Propose Barter
-                    </button>
-                </div>
-            </div>
-
-            <div class="card" data-type="SELL">
-                <div class="card-img" style="background:#fef3c7; font-size:3rem; color:#d97706;">
-                    <i class="fa-solid fa-calculator"></i>
-                </div>
-                <div style="padding:1rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                        <span class="badge-type type-sell">For Sale</span>
-                        <span style="font-weight:700; color:var(--primary-dark);">$45</span>
-                    </div>
-                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">TI-84 Plus CE Calculator</h3>
-                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">Color graphing calculator in excellent condition with charger cable.</p>
-                    <button onclick="alert('Connect to backend API to buy item')" style="width:100%; padding:0.5rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
-                        Contact Seller
-                    </button>
-                </div>
-            </div>
-
-            <div class="card" data-type="DONATE">
-                <div class="card-img" style="background:#f0fdf4; font-size:3rem; color:#16a34a;">
-                    <i class="fa-solid fa-flask-vial"></i>
-                </div>
-                <div style="padding:1rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                        <span class="badge-type type-donate">Free Donation</span>
-                        <span style="font-weight:700; color:#16a34a;">FREE</span>
-                    </div>
-                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">Chemistry Lab Coat (Size M)</h3>
-                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">Clean white lab coat, no stains. Free to any first-year STEM student.</p>
-                    <button onclick="alert('Claimed! Contact donor via campus email.')" style="width:100%; padding:0.5rem; background:#16a34a; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
-                        Claim Donation
-                    </button>
-                </div>
-            </div>
-
-            <div class="card" data-type="BARTER">
-                <div class="card-img" style="background:#fae8ff; font-size:3rem; color:#c026d3;">
-                    <i class="fa-solid fa-chair"></i>
-                </div>
-                <div style="padding:1rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                        <span class="badge-type type-barter">Barter Trade</span>
-                        <span style="font-weight:700; color:var(--primary-dark);">Exchange</span>
-                    </div>
-                    <h3 style="font-size:1.1rem; margin-bottom:0.3rem;">Ergonomic Dorm Desk Chair</h3>
-                    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">Mesh back support. Will exchange for desk lamp or monitor stand.</p>
-                    <button onclick="openBarterModal('Ergonomic Dorm Desk Chair')" style="width:100%; padding:0.5rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
-                        Propose Barter
-                    </button>
-                </div>
-            </div>
+            <!-- Dynamic Items populated by JavaScript -->
         </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p><i class="fa-solid fa-recycle"></i> CampusCycle Student Marketplace & Barter System &copy; 2026</p>
+            <p style="font-size:0.8rem; opacity:0.8; margin-top:0.3rem;">Promoting Zero-Waste Campus Sustainability & Affordable Student Learning Resources</p>
+        </div>
+    </footer>
 
     <!-- Barter Proposal Modal -->
     <div class="modal-overlay" id="barterModal">
         <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('barterModal')">&times;</button>
             <h3 style="margin-bottom:0.5rem; color:var(--primary-dark);"><i class="fa-solid fa-handshake"></i> Propose Barter Trade</h3>
-            <p style="font-size:0.9rem; color:var(--muted); margin-bottom:1rem;" id="modalItemTarget"></p>
-            <div style="margin-bottom:1rem;">
-                <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.3rem;">What item will you offer in exchange?</label>
-                <input type="text" placeholder="e.g. Organic Chemistry Notes & Flashcards" style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:6px;">
-            </div>
-            <div style="margin-bottom:1.5rem;">
-                <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.3rem;">Message to Seller</label>
-                <textarea rows="3" placeholder="I can meet up at the Campus Student Union tomorrow afternoon!" style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:6px;"></textarea>
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
-                <button onclick="closeBarterModal()" style="padding:0.5rem 1rem; background:#f1f5f9; border:none; border-radius:6px; cursor:pointer;">Cancel</button>
-                <button onclick="submitBarter()" style="padding:0.5rem 1rem; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Submit Proposal</button>
-            </div>
+            <p style="font-size:0.9rem; color:var(--muted); margin-bottom:1.2rem;" id="barterItemTarget"></p>
+
+            <form onsubmit="submitBarterForm(event)">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="barterSenderName" required placeholder="Alex Johnson (Hostel B-302)">
+                </div>
+                <div class="form-group">
+                    <label>What item will you offer in exchange?</label>
+                    <input type="text" id="barterOfferItem" required placeholder="e.g. Organic Chemistry Notes & Flashcards">
+                </div>
+                <div class="form-group">
+                    <label>Message to Owner</label>
+                    <textarea id="barterMessage" rows="3" required placeholder="Hi! I have the requested notes in pristine condition. Can meet at Student Center tomorrow."></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+                    <button type="button" onclick="closeModal('barterModal')" class="btn" style="background:#f1f5f9;">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Barter Offer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Post Item Modal -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('postModal')">&times;</button>
+            <h3 style="margin-bottom:1rem; color:var(--primary-dark);"><i class="fa-solid fa-plus-circle"></i> Post New Item / Trade</h3>
+
+            <form onsubmit="submitNewListing(event)">
+                <div class="form-group">
+                    <label>Item Title</label>
+                    <input type="text" id="postTitle" required placeholder="e.g. Data Structures & Algorithms Textbook">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="postCategory" required>
+                        <option value="Textbooks">Textbooks & Notes</option>
+                        <option value="Lab Equipment">Lab Equipment</option>
+                        <option value="Electronics">Electronics & Calculators</option>
+                        <option value="Furniture">Dorm Furniture & Decor</option>
+                        <option value="Stationery">Stationery & Art Supplies</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Listing Type</label>
+                    <select id="postType" required onchange="togglePriceField(this.value)">
+                        <option value="BARTER">Barter Exchange (Item for Item)</option>
+                        <option value="SELL">For Sale ($)</option>
+                        <option value="DONATE">Free Donation</option>
+                        <option value="BUY">Buying Wanted</option>
+                    </select>
+                </div>
+                <div class="form-group" id="priceGroup" style="display:none;">
+                    <label>Price ($)</label>
+                    <input type="number" id="postPrice" step="0.01" min="0" placeholder="e.g. 25.00">
+                </div>
+                <div class="form-group">
+                    <label>Description & Condition</label>
+                    <textarea id="postDescription" rows="3" required placeholder="Describe condition, edition, or what you are looking for in trade..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Seller / Student Name & Hostel</label>
+                    <input type="text" id="postSeller" required placeholder="Sam Taylor (Block C-104)">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+                    <button type="button" onclick="closeModal('postModal')" class="btn" style="background:#f1f5f9;">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Publish Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Item Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+            <div id="detailContent"></div>
         </div>
     </div>
 
     <script>
-        function filterItems(type) {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const cards = document.querySelectorAll('#itemsGrid .card');
-            cards.forEach(card => {
-                if (type === 'ALL' || card.dataset.type === type) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+        // Initial Mock Database Items
+        const initialListings = [
+            {
+                id: 1,
+                title: "Macroeconomics 9th Edition",
+                category: "Textbooks",
+                type: "BARTER",
+                price: 0,
+                icon: "fa-book",
+                bg: "#e0f2fe",
+                color: "#0284c7",
+                description: "Clean copy with no highlights. Seeking Organic Chemistry lab manual or notes in exchange.",
+                seller: "Jordan Miller (Hostel A-204)"
+            },
+            {
+                id: 2,
+                title: "TI-84 Plus CE Color Calculator",
+                category: "Electronics",
+                type: "SELL",
+                price: 45.00,
+                icon: "fa-calculator",
+                bg: "#fef3c7",
+                color: "#d97706",
+                description: "Fully working color graphing calculator with USB charging cable and protective cover.",
+                seller: "Priya Sharma (Block B-112)"
+            },
+            {
+                id: 3,
+                title: "Chemistry Lab Coat & Safety Goggles",
+                category: "Lab Equipment",
+                type: "DONATE",
+                price: 0,
+                icon: "fa-flask-vial",
+                bg: "#f0fdf4",
+                color: "#16a34a",
+                description: "Size M white lab coat and anti-fog safety goggles. Free to any freshman STEM student.",
+                seller: "David Kim (Hostel C-301)"
+            },
+            {
+                id: 4,
+                title: "Ergonomic Dorm Desk Chair",
+                category: "Furniture",
+                type: "BARTER",
+                price: 0,
+                icon: "fa-chair",
+                bg: "#fae8ff",
+                color: "#c026d3",
+                description: "Adjustable height mesh chair. Will trade for an LED desk lamp or laptop stand.",
+                seller: "Emma Watson (Block A-405)"
+            },
+            {
+                id: 5,
+                title: "Engineering Drawing Set & T-Square",
+                category: "Stationery",
+                type: "SELL",
+                price: 18.00,
+                icon: "fa-compass-drafting",
+                bg: "#fce7f3",
+                color: "#db2777",
+                description: "Complete mechanical drafting tool kit with stainless T-square and compass set.",
+                seller: "Lucas Vance (Block D-202)"
+            }
+        ];
+
+        let listings = JSON.parse(localStorage.getItem('campuscycle_listings')) || initialListings;
+        let currentFilterType = 'ALL';
+
+        function renderListings() {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+
+            const searchQ = document.getElementById('searchInput').value.toLowerCase();
+            const selectedCat = document.getElementById('categorySelect').value;
+
+            const filtered = listings.filter(item => {
+                const matchesType = currentFilterType === 'ALL' || item.type === currentFilterType;
+                const matchesCat = selectedCat === 'ALL' || item.category === selectedCat;
+                const matchesSearch = item.title.toLowerCase().includes(searchQ) ||
+                                      item.description.toLowerCase().includes(searchQ) ||
+                                      item.seller.toLowerCase().includes(searchQ);
+                return matchesType && matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; padding:3rem; background:white; border-radius:12px; border:1px dashed #cbd5e1;">
+                        <i class="fa-solid fa-box-open" style="font-size:3rem; color:#94a3b8; margin-bottom:1rem;"></i>
+                        <h3 style="color:#334155;">No matching listings found</h3>
+                        <p style="color:#64748b; font-size:0.9rem;">Try adjusting your search query or filter category.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-img" style="background:${item.bg}; color:${item.color};">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div class="card-body">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                            <span class="badge-type type-${item.type}">${formatType(item.type)}</span>
+                            <span style="font-weight:700; color:var(--primary-dark);">${formatPrice(item)}</span>
+                        </div>
+                        <h3 class="card-title">${escapeHtml(item.title)}</h3>
+                        <p class="card-meta" style="margin-bottom:0.8rem;">${escapeHtml(truncate(item.description, 75))}</p>
+                        <div class="card-footer-btns">
+                            <button onclick="showDetail(${item.id})" class="btn-action" style="background:#f1f5f9; color:#334155;">
+                                <i class="fa-solid fa-circle-info"></i> Details
+                            </button>
+                            ${getActionBtn(item)}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
             });
         }
 
-        function openBarterModal(itemName) {
-            document.getElementById('modalItemTarget').innerText = "Proposing trade for: " + itemName;
+        function formatType(type) {
+            switch(type) {
+                case 'BARTER': return 'Barter Trade';
+                case 'SELL': return 'For Sale';
+                case 'DONATE': return 'Free Gift';
+                case 'BUY': return 'Buying Wanted';
+                default: return type;
+            }
+        }
+
+        function formatPrice(item) {
+            if (item.type === 'DONATE') return 'FREE';
+            if (item.type === 'BARTER') return 'EXCHANGE';
+            return '$' + parseFloat(item.price || 0).toFixed(2);
+        }
+
+        function getActionBtn(item) {
+            if (item.type === 'BARTER') {
+                return `<button onclick="openBarterModal('${escapeHtml(item.title)}')" class="btn-action" style="background:var(--primary); color:white;">
+                            <i class="fa-solid fa-handshake"></i> Propose Trade
+                        </button>`;
+            } else if (item.type === 'DONATE') {
+                return `<button onclick="alert('Donation claimed! Contact seller via email.')" class="btn-action" style="background:#16a34a; color:white;">
+                            <i class="fa-solid fa-gift"></i> Claim Free
+                        </button>`;
+            } else {
+                return `<button onclick="alert('Contacting seller: ' + '${escapeHtml(item.seller)}')" class="btn-action" style="background:var(--primary); color:white;">
+                            <i class="fa-solid fa-envelope"></i> Contact
+                        </button>`;
+            }
+        }
+
+        function setFilterType(type, btn) {
+            currentFilterType = type;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderListings();
+        }
+
+        function applyFilters() {
+            renderListings();
+        }
+
+        function openBarterModal(title) {
+            document.getElementById('barterItemTarget').innerText = "Target Item: " + title;
             document.getElementById('barterModal').classList.add('open');
         }
 
-        function closeBarterModal() {
-            document.getElementById('barterModal').classList.remove('open');
+        function openPostModal() {
+            document.getElementById('postModal').classList.add('open');
         }
 
-        function submitBarter() {
-            alert('Barter Proposal Sent Successfully!');
-            closeBarterModal();
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
         }
+
+        function togglePriceField(val) {
+            document.getElementById('priceGroup').style.display = (val === 'SELL') ? 'block' : 'none';
+        }
+
+        function showDetail(id) {
+            const item = listings.find(i => i.id === id);
+            if (!item) return;
+            const content = document.getElementById('detailContent');
+            content.innerHTML = `
+                <div style="text-align:center; padding:1.5rem; background:${item.bg}; color:${item.color}; border-radius:12px; margin-bottom:1rem; font-size:4rem;">
+                    <i class="fa-solid ${item.icon}"></i>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <span class="badge-type type-${item.type}">${formatType(item.type)}</span>
+                    <span style="font-size:1.2rem; font-weight:700; color:var(--primary-dark);">${formatPrice(item)}</span>
+                </div>
+                <h2 style="margin-bottom:0.5rem; color:var(--text);">${escapeHtml(item.title)}</h2>
+                <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1rem;">Category: <strong>${escapeHtml(item.category)}</strong></p>
+                <div style="background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:1.5rem;">
+                    <h4 style="margin-bottom:0.3rem; font-size:0.9rem; color:#475569;">Description:</h4>
+                    <p style="color:#334155; font-size:0.95rem; margin:0;">${escapeHtml(item.description)}</p>
+                </div>
+                <div style="background:#f0fdf4; padding:0.75rem 1rem; border-radius:8px; border:1px solid #bbf7d0; margin-bottom:1.5rem;">
+                    <p style="margin:0; font-size:0.85rem; color:#166534;"><i class="fa-solid fa-user-graduate"></i> Posted by: <strong>${escapeHtml(item.seller)}</strong></p>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                    <button onclick="closeModal('detailModal')" class="btn" style="background:#f1f5f9;">Close</button>
+                    ${getActionBtn(item)}
+                </div>
+            `;
+            document.getElementById('detailModal').classList.add('open');
+        }
+
+        function submitBarterForm(e) {
+            e.preventDefault();
+            alert('Barter trade proposal submitted successfully to the listing owner!');
+            closeModal('barterModal');
+        }
+
+        function submitNewListing(e) {
+            e.preventDefault();
+            const newItem = {
+                id: Date.now(),
+                title: document.getElementById('postTitle').value,
+                category: document.getElementById('postCategory').value,
+                type: document.getElementById('postType').value,
+                price: parseFloat(document.getElementById('postPrice').value || 0),
+                description: document.getElementById('postDescription').value,
+                seller: document.getElementById('postSeller').value,
+                icon: getCategoryIcon(document.getElementById('postCategory').value),
+                bg: "#e0f2fe",
+                color: "#0284c7"
+            };
+
+            listings.unshift(newItem);
+            localStorage.setItem('campuscycle_listings', JSON.stringify(listings));
+            closeModal('postModal');
+            renderListings();
+            alert('Your listing has been posted live!');
+        }
+
+        function getCategoryIcon(cat) {
+            switch(cat) {
+                case 'Textbooks': return 'fa-book';
+                case 'Lab Equipment': return 'fa-flask-vial';
+                case 'Electronics': return 'fa-calculator';
+                case 'Furniture': return 'fa-chair';
+                case 'Stationery': return 'fa-pen-ruler';
+                default: return 'fa-box';
+            }
+        }
+
+        function truncate(str, len) {
+            return str.length > len ? str.substring(0, len) + '...' : str;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Initial Render
+        renderListings();
     </script>
 </body>
 </html>
