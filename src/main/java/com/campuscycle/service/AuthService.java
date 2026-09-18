@@ -93,9 +93,7 @@ public class AuthService {
         if (email == null || !email.contains("@")) {
             return false;
         }
-        String configuredDomains = AppConfig.get(
-                "college.email.domains",
-                AppConfig.get("college.email.domain", "*"));
+        String configuredDomains = AppConfig.get("collegeEmailDomains", "*");
         if ("*".equals(configuredDomains.trim())) {
             return email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
         }

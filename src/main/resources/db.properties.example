@@ -3,10 +3,10 @@
 neonDbUrl=postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require&channel_binding=require
 
 # Optional local fallback:
-# db.url=jdbc:postgresql://localhost:5432/campuscycle?sslmode=disable
-# db.username=postgres
-# db.password=postgres
+# dbUrl=jdbc:postgresql://localhost:5432/campuscycle?sslmode=disable
+# dbUsername=postgres
+# dbPassword=postgres
 
-upload.path=uploads
-upload.maxSize=5242880
-college.email.domains=*
+uploadPath=uploads
+uploadMaxSize=5242880
+collegeEmailDomains=*

@@ -37,13 +37,13 @@ public final class FileUploadUtil {
             return result;
         }
 
-        String uploadDir = context.getRealPath("/" + AppConfig.get("upload.path", "uploads"));
+        String uploadDir = context.getRealPath("/" + AppConfig.get("uploadPath", "uploads"));
         File dir = new File(uploadDir);
         if (!dir.exists() && !dir.mkdirs()) {
             throw new IllegalStateException("Cannot create upload directory");
         }
 
-        long maxSize = Long.parseLong(AppConfig.get("upload.maxSize", "5242880"));
+        long maxSize = Long.parseLong(AppConfig.get("uploadMaxSize", "5242880"));
         DiskFileItemFactory factory = new DiskFileItemFactory(MAX_MEMORY, dir);
         ServletFileUpload upload = new ServletFileUpload(factory);
         upload.setFileSizeMax(maxSize);
@@ -57,7 +57,7 @@ public final class FileUploadUtil {
                 String filename = UUID.randomUUID() + ext;
                 File saved = new File(dir, filename);
                 item.write(saved);
-                result.files.put(item.getFieldName(), AppConfig.get("upload.path", "uploads") + "/" + filename);
+                result.files.put(item.getFieldName(), AppConfig.get("uploadPath", "uploads") + "/" + filename);
             }
         }
         return result;

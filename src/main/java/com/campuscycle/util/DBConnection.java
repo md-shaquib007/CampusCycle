@@ -12,13 +12,13 @@ public final class DBConnection {
     private DBConnection() {}
 
     public static Connection getConnection() throws SQLException {
-        String driver = AppConfig.get("db.driver", "org.postgresql.Driver");
-        String configuredUrl = cleanConfiguredUrl(AppConfig.get("db.url"));
+        String driver = AppConfig.get("dbDriver", "org.postgresql.Driver");
+        String configuredUrl = cleanConfiguredUrl(AppConfig.get("dbUrl"));
         String url = normalizeJdbcUrl(configuredUrl);
-        String username = AppConfig.get("db.username");
-        String password = AppConfig.get("db.password", "");
+        String username = AppConfig.get("dbUsername");
+        String password = AppConfig.get("dbPassword", "");
         if (url == null || url.isBlank()) {
-            throw new SQLException("neonDbUrl/db.url is not configured");
+            throw new SQLException("neonDbUrl/dbUrl is not configured");
         }
         try {
             Class.forName(driver);
