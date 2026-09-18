@@ -13,6 +13,10 @@
       "dest": "/src/main/webapp/css/$1"
     },
     {
+      "src": "/assets/(.*)",
+      "dest": "/src/main/webapp/css/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/src/main/webapp/index.html"
     }
