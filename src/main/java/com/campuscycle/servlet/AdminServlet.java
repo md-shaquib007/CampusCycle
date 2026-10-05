@@ -34,13 +34,13 @@ public class AdminServlet extends HttpServlet {
         String action = req.getParameter("action");
         try {
             switch (action != null ? action : "") {
-                case "verify" -> adminService.verifyUser(Integer.parseInt(req.getParameter("userId")));
-                case "suspend" -> adminService.suspendUser(Integer.parseInt(req.getParameter("userId")), true);
-                case "unsuspend" -> adminService.suspendUser(Integer.parseInt(req.getParameter("userId")), false);
-                case "approveListing" -> listingService.approve(Integer.parseInt(req.getParameter("listingId")));
-                case "rejectListing" -> listingService.reject(Integer.parseInt(req.getParameter("listingId")));
+                case "verify" -> adminService.verifyUser(parseId(req.getParameter("userId")));
+                case "suspend" -> adminService.suspendUser(parseId(req.getParameter("userId")), true);
+                case "unsuspend" -> adminService.suspendUser(parseId(req.getParameter("userId")), false);
+                case "approveListing" -> listingService.approve(parseId(req.getParameter("listingId")));
+                case "rejectListing" -> listingService.reject(parseId(req.getParameter("listingId")));
                 case "resolveReport" -> adminService.resolveReport(
-                        Integer.parseInt(req.getParameter("reportId")),
+                        parseId(req.getParameter("reportId")),
                         req.getParameter("status"),
                         req.getParameter("adminNote"));
                 default -> {}
@@ -50,5 +50,12 @@ public class AdminServlet extends HttpServlet {
             req.getSession().setAttribute("flashError", "Admin action failed.");
         }
         resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+    }
+
+    private int parseId(String val) {
+        if (val == null || val.isBlank()) {
+            throw new IllegalArgumentException("Missing required ID parameter");
+        }
+        return Integer.parseInt(val.trim());
     }
 }

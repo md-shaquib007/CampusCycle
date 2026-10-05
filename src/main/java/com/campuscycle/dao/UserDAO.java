@@ -202,7 +202,16 @@ public class UserDAO {
         user.setSemester(rs.getString("semester"));
         user.setHostel(rs.getString("hostel"));
         user.setPhone(rs.getString("phone"));
-        user.setRole(UserRole.valueOf(rs.getString("role")));
+        String roleStr = rs.getString("role");
+        if (roleStr != null) {
+            try {
+                user.setRole(UserRole.valueOf(roleStr.trim().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                user.setRole(UserRole.STUDENT);
+            }
+        } else {
+            user.setRole(UserRole.STUDENT);
+        }
         user.setVerified(rs.getBoolean("verified"));
         user.setSuspended(rs.getBoolean("suspended"));
         user.setRatingAvg(rs.getDouble("rating_avg"));

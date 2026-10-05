@@ -31,16 +31,22 @@ public final class FileUploadUtil {
         return ServletFileUpload.isMultipartContent(request);
     }
 
+    private static final java.util.Set<String> ALLOWED_EXTENSIONS = java.util.Set.of(
+            ".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf"
+    );
+
     public static UploadResult parse(HttpServletRequest request, ServletContext context) throws Exception {
         UploadResult result = new UploadResult();
         if (!isMultipart(request)) {
             return result;
         }
 
-        String uploadDir = context.getRealPath("/" + AppConfig.get("uploadPath", "uploads"));
-        File dir = new File(uploadDir);
+        String relativeUploadPath = AppConfig.get("uploadPath", "uploads");
+        String realPath = context != null ? context.getRealPath("/" + relativeUploadPath) : null;
+        File dir = realPath != null ? new File(realPath) : new File(System.getProperty("java.io.tmpdir"), relativeUploadPath);
         if (!dir.exists() && !dir.mkdirs()) {
-            throw new IllegalStateException("Cannot create upload directory");
+            dir = new File(relativeUploadPath);
+            dir.mkdirs();
         }
 
         long maxSize = Long.parseLong(AppConfig.get("uploadMaxSize", "5242880"));
@@ -54,10 +60,13 @@ public final class FileUploadUtil {
                 result.fields.put(item.getFieldName(), item.getString("UTF-8"));
             } else if (item.getSize() > 0) {
                 String ext = getExtension(item.getName());
+                if (!ALLOWED_EXTENSIONS.contains(ext)) {
+                    throw new IllegalArgumentException("Invalid file type. Allowed types: jpg, jpeg, png, webp, gif, pdf");
+                }
                 String filename = UUID.randomUUID() + ext;
                 File saved = new File(dir, filename);
                 item.write(saved);
-                result.files.put(item.getFieldName(), AppConfig.get("uploadPath", "uploads") + "/" + filename);
+                result.files.put(item.getFieldName(), relativeUploadPath + "/" + filename);
             }
         }
         return result;
@@ -66,6 +75,7 @@ public final class FileUploadUtil {
     private static String getExtension(String name) {
         if (name == null) return ".jpg";
         int dot = name.lastIndexOf('.');
-        return dot >= 0 ? name.substring(dot).toLowerCase() : ".jpg";
+        String ext = dot >= 0 ? name.substring(dot).toLowerCase() : ".jpg";
+        return ext;
     }
 }
