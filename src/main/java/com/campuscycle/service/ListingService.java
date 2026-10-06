@@ -64,7 +64,11 @@ public class ListingService {
         listing.setDescription(description.trim());
         listing.setListingType(ListingType.fromString(typeStr));
         listing.setConditionType(ConditionType.fromString(upload.getField("conditionType")));
-        listing.setCategoryId(Integer.parseInt(categoryStr));
+        try {
+            listing.setCategoryId(Integer.parseInt(categoryStr));
+        } catch (NumberFormatException e) {
+            return "Invalid category selection.";
+        }
         listing.setBarterWanted(upload.getField("barterWanted"));
         listing.setPickupLocation(upload.getField("pickupLocation"));
         listing.setCourse(upload.getField("course"));
