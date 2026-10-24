@@ -61,15 +61,18 @@ public class AuthService {
         return Optional.of(user);
     }
 
-    public String requestPasswordReset(String email) throws SQLException {
-        Optional<User> userOpt = userDAO.findByEmail(email);
+    public Optional<String> requestPasswordReset(String email) throws SQLException {
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+        Optional<User> userOpt = userDAO.findByEmail(email.trim().toLowerCase());
         if (userOpt.isEmpty()) {
-            return "If the email exists, a reset link has been generated.";
+            return Optional.empty();
         }
         String token = TokenUtil.generateToken();
         Timestamp expires = Timestamp.from(Instant.now().plus(1, ChronoUnit.HOURS));
         userDAO.saveResetToken(userOpt.get().getId(), token, expires);
-        return token;
+        return Optional.of(token);
     }
 
     public String resetPassword(String token, String newPassword) throws SQLException {

@@ -6,14 +6,13 @@ import com.campuscycle.dao.SustainabilityDAO;
 import com.campuscycle.model.BarterProposal;
 import com.campuscycle.model.Listing;
 import com.campuscycle.model.ListingStatus;
+import com.campuscycle.util.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-
-import com.campuscycle.util.DBConnection;
 
 public class BarterService {
     private final BarterDAO barterDAO = new BarterDAO();
@@ -81,10 +80,11 @@ public class BarterService {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                barterDAO.updateStatus(proposalId, "COMPLETED");
-                listingDAO.updateStatus(target.getId(), ListingStatus.EXCHANGED);
-                listingDAO.updateStatus(offered.getId(), ListingStatus.EXCHANGED);
+                barterDAO.updateStatus(conn, proposalId, "COMPLETED");
+                listingDAO.updateStatus(conn, target.getId(), ListingStatus.EXCHANGED);
+                listingDAO.updateStatus(conn, offered.getId(), ListingStatus.EXCHANGED);
                 sustainabilityDAO.recordTransaction(
+                        conn,
                         target.getId(), target.getUserId(), offered.getUserId(),
                         "BARTER", BigDecimal.ZERO, proposalId);
                 conn.commit();

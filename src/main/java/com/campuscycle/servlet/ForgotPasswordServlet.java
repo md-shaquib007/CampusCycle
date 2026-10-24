@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @WebServlet(urlPatterns = {"/forgot-password", "/reset-password"})
 public class ForgotPasswordServlet extends HttpServlet {
@@ -46,9 +47,13 @@ public class ForgotPasswordServlet extends HttpServlet {
         } else {
             String email = req.getParameter("email");
             try {
-                String token = authService.requestPasswordReset(email);
-                req.setAttribute("success", "Reset token generated (demo): " + token);
-                req.setAttribute("resetLink", req.getContextPath() + "/reset-password?token=" + token);
+                Optional<String> tokenOpt = authService.requestPasswordReset(email);
+                // Securely notify user without exposing user existence or raw reset token on page
+                req.setAttribute("success", "If an account with that email exists, password reset instructions have been generated.");
+                // Log token in secure server logs for demo/admin reference rather than exposing it on screen
+                tokenOpt.ifPresent(token -> {
+                    System.out.println("[CampusCycle] Password reset token generated for " + email + ": " + token);
+                });
             } catch (Exception e) {
                 req.setAttribute("error", "Request failed.");
             }

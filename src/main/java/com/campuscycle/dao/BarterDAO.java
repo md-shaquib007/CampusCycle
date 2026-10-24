@@ -68,9 +68,14 @@ public class BarterDAO {
     }
 
     public void updateStatus(int id, String status) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            updateStatus(conn, id, status);
+        }
+    }
+
+    public void updateStatus(Connection conn, int id, String status) throws SQLException {
         String sql = "UPDATE barter_proposals SET status = ?, completed_at = CASE WHEN ? = 'COMPLETED' THEN NOW() ELSE completed_at END WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setString(2, status);
             ps.setInt(3, id);

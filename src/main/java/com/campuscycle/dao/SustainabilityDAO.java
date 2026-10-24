@@ -38,14 +38,13 @@ public class SustainabilityDAO {
         }
     }
 
-    public void recordTransaction(int listingId, int sellerId, int buyerId,
+    public void recordTransaction(Connection conn, int listingId, int sellerId, int buyerId,
                                   String type, BigDecimal amount, Integer barterId) throws SQLException {
         String sql = """
             INSERT INTO transactions (listing_id, seller_id, buyer_id, transaction_type, amount, barter_id)
             VALUES (?, ?, ?, ?, ?, ?)
             """;
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, listingId);
             ps.setInt(2, sellerId);
             ps.setInt(3, buyerId);
@@ -54,6 +53,13 @@ public class SustainabilityDAO {
             if (barterId != null) ps.setInt(6, barterId);
             else ps.setNull(6, Types.INTEGER);
             ps.executeUpdate();
+        }
+    }
+
+    public void recordTransaction(int listingId, int sellerId, int buyerId,
+                                  String type, BigDecimal amount, Integer barterId) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            recordTransaction(conn, listingId, sellerId, buyerId, type, amount, barterId);
         }
     }
 }

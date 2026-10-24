@@ -159,13 +159,18 @@ public class ListingDAO {
         return search(filter);
     }
 
-    public void updateStatus(int id, ListingStatus status) throws SQLException {
+    public void updateStatus(Connection conn, int id, ListingStatus status) throws SQLException {
         String sql = "UPDATE listings SET status = ? WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status.name());
             ps.setInt(2, id);
             ps.executeUpdate();
+        }
+    }
+
+    public void updateStatus(int id, ListingStatus status) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            updateStatus(conn, id, status);
         }
     }
 
@@ -263,7 +268,11 @@ public class ListingDAO {
             Object p = params.get(i);
             if (p instanceof String s) ps.setString(i + 1, s);
             else if (p instanceof Integer n) ps.setInt(i + 1, n);
+            else if (p instanceof Long l) ps.setLong(i + 1, l);
+            else if (p instanceof BigDecimal bd) ps.setBigDecimal(i + 1, bd);
+            else if (p instanceof Boolean b) ps.setBoolean(i + 1, b);
             else if (p instanceof ListingStatus ls) ps.setString(i + 1, ls.name());
+            else ps.setObject(i + 1, p);
         }
     }
 
