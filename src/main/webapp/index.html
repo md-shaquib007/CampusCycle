@@ -263,6 +263,11 @@
                 <option value="Furniture">Dorm Furniture & Decor</option>
                 <option value="Stationery">Stationery & Art Supplies</option>
             </select>
+            <select id="sortSelect" onchange="applyFilters()" style="padding:0.75rem 1rem; border-radius:8px; border:1px solid #cbd5e1; background:white; font-size:0.95rem; font-family:inherit;">
+                <option value="DEFAULT">Sort: Featured</option>
+                <option value="PRICE_ASC">Price: Low to High</option>
+                <option value="PRICE_DESC">Price: High to Low</option>
+            </select>
         </div>
 
         <!-- Campus Sustainability Stats -->
@@ -302,6 +307,19 @@
             <h3 style="margin-bottom:0.5rem; color:var(--primary-dark);"><i class="fa-solid fa-handshake"></i> Propose Barter Trade</h3>
             <p style="font-size:0.9rem; color:var(--muted); margin-bottom:1.2rem;" id="barterItemTarget"></p>
 
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:1.2rem;">
+                    <div style="font-size:0.85rem; font-weight:600; color:var(--primary-dark); margin-bottom:6px;">
+                        <i class="fa-solid fa-calculator"></i> Fair Value Barter Calculator
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="number" id="barterOfferValue" placeholder="Your item's value (₹)" style="padding:6px 10px; font-size:0.85rem; border:1px solid #cbd5e1; border-radius:6px; flex:1;" oninput="calcBarterDiff()">
+                        <span style="font-size:0.85rem; color:#64748b;">vs</span>
+                        <input type="number" id="barterTargetValue" placeholder="Target item value (₹)" style="padding:6px 10px; font-size:0.85rem; border:1px solid #cbd5e1; border-radius:6px; flex:1;" oninput="calcBarterDiff()">
+                    </div>
+                    <div id="barterDiffResult" style="font-size:0.82rem; margin-top:6px; font-weight:600; color:#64748b;">
+                        Enter values to calculate fair cash top-up
+                    </div>
+                </div>
             <form onsubmit="submitBarterForm(event)">
                 <div class="form-group">
                     <label>Your Name</label>
@@ -456,7 +474,8 @@
             const searchQ = document.getElementById('searchInput').value.toLowerCase();
             const selectedCat = document.getElementById('categorySelect').value;
 
-            const filtered = listings.filter(item => {
+            const sortMode = (document.getElementById('sortSelect') || {}).value || 'DEFAULT';
+            let filtered = listings.filter(item => {
                 const matchesType = currentFilterType === 'ALL' || item.type === currentFilterType;
                 const matchesCat = selectedCat === 'ALL' || item.category === selectedCat;
                 const matchesSearch = item.title.toLowerCase().includes(searchQ) ||
@@ -464,6 +483,12 @@
                                       item.seller.toLowerCase().includes(searchQ);
                 return matchesType && matchesCat && matchesSearch;
             });
+
+            if (sortMode === 'PRICE_ASC') {
+                filtered.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+            } else if (sortMode === 'PRICE_DESC') {
+                filtered.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+            }
 
             if (filtered.length === 0) {
                 grid.innerHTML = `
@@ -545,7 +570,33 @@
             renderListings();
         }
 
-        function openBarterModal(title) {
+        function calcBarterDiff() {
+            const offer = Number(document.getElementById('barterOfferValue').value) || 0;
+            const target = Number(document.getElementById('barterTargetValue').value) || 0;
+            const res = document.getElementById('barterDiffResult');
+            if (!offer && !target) {
+                res.innerHTML = "Enter estimated values to calculate fair cash adjustment";
+                res.style.color = "#64748b";
+                return;
+            }
+            const diff = target - offer;
+            if (diff === 0) {
+                res.innerHTML = "✓ Perfect 1:1 Fair Exchange! No cash top-up needed.";
+                res.style.color = "#059669";
+            } else if (diff > 0) {
+                res.innerHTML = "Suggested top-up: Add ₹" + diff + " in cash to balance trade.";
+                res.style.color = "#d97706";
+            } else {
+                res.innerHTML = "Your item is worth ₹" + Math.abs(diff) + " more! Request cash top-up from seller.";
+                res.style.color = "#2563eb";
+            }
+        }
+
+        function openBarterModal(title, price) {
+            if (price && document.getElementById('barterTargetValue')) {
+                document.getElementById('barterTargetValue').value = price;
+                calcBarterDiff();
+            }
             document.getElementById('barterItemTarget').innerText = "Target Item: " + title;
             document.getElementById('barterModal').classList.add('open');
         }
