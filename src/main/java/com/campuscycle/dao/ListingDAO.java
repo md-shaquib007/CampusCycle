@@ -54,7 +54,7 @@ public class ListingDAO {
 
     public Optional<Listing> findById(int id) throws SQLException {
         String sql = """
-            SELECT l.*, u.name AS seller_name, u.email AS seller_email, u.hostel AS seller_hostel,
+            SELECT l.*, u.name AS seller_name, u.email AS seller_email, u.hostel AS seller_hostel, u.phone AS seller_phone,
                    c.name AS category_name,
                    (SELECT image_path FROM listing_images WHERE listing_id = l.id AND is_primary = TRUE LIMIT 1) AS primary_image
             FROM listings l
@@ -93,7 +93,7 @@ public class ListingDAO {
 
     public List<Listing> search(ListingFilter filter) throws SQLException {
         StringBuilder sql = new StringBuilder("""
-            SELECT l.*, u.name AS seller_name, u.email AS seller_email, u.hostel AS seller_hostel,
+            SELECT l.*, u.name AS seller_name, u.email AS seller_email, u.hostel AS seller_hostel, u.phone AS seller_phone,
                    c.name AS category_name,
                    (SELECT image_path FROM listing_images WHERE listing_id = l.id AND is_primary = TRUE LIMIT 1) AS primary_image
             FROM listings l
@@ -296,6 +296,7 @@ public class ListingDAO {
         l.setSellerName(rs.getString("seller_name"));
         l.setSellerEmail(rs.getString("seller_email"));
         l.setSellerHostel(rs.getString("seller_hostel"));
+        try { l.setSellerPhone(rs.getString("seller_phone")); } catch (SQLException ignored) {}
         l.setCategoryName(rs.getString("category_name"));
         l.setPrimaryImage(rs.getString("primary_image"));
         return l;

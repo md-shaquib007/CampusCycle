@@ -39,6 +39,15 @@
 
                 <p><strong>Pickup:</strong> <c:out value="${listing.pickupLocation}"/></p>
                 <p><strong>Seller:</strong> <c:out value="${listing.sellerName}"/> (<c:out value="${listing.sellerHostel}"/>)</p>
+                <c:if test="${not empty listing.sellerPhone}">
+                    <div style="margin:0.75rem 0;">
+                        <a href="https://wa.me/${listing.sellerPhone.replaceAll('[^0-9]', '')}?text=Hi%20${listing.sellerName}%2C%20I%20am%20interested%20in%20your%20listing%20'${listing.title}'%20on%20CampusCycle"
+                           target="_blank" rel="noopener noreferrer"
+                           class="btn btn-outline" style="background:#25D366;color:#fff;border-color:#25D366;display:inline-flex;align-items:center;gap:0.5rem;font-weight:600;padding:0.4rem 0.8rem;text-decoration:none;border-radius:6px;">
+                            💬 WhatsApp Seller
+                        </a>
+                    </div>
+                </c:if>
                 <p style="font-size:0.85rem;color:var(--muted);">${listing.views} views</p>
 
                 <c:if test="${sessionScope.currentUser != null && sessionScope.currentUser.id != listing.userId}">

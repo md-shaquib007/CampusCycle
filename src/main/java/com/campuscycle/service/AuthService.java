@@ -92,7 +92,7 @@ public class AuthService {
         userDAO.updateProfile(user);
     }
 
-    private boolean isValidCollegeEmail(String email) {
+    public boolean isValidCollegeEmail(String email) {
         if (email == null || !email.contains("@")) {
             return false;
         }

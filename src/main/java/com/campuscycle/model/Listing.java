@@ -25,6 +25,7 @@ public class Listing {
     private String sellerName;
     private String sellerEmail;
     private String sellerHostel;
+    private String sellerPhone;
     private String categoryName;
     private String primaryImage;
     private List<String> images = new ArrayList<>();
@@ -83,6 +84,8 @@ public class Listing {
 
     public String getSellerHostel() { return sellerHostel; }
     public void setSellerHostel(String sellerHostel) { this.sellerHostel = sellerHostel; }
+    public String getSellerPhone() { return sellerPhone; }
+    public void setSellerPhone(String sellerPhone) { this.sellerPhone = sellerPhone; }
 
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }

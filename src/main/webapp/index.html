@@ -528,7 +528,7 @@
                             <i class="fa-solid fa-gift"></i> Claim Free
                         </button>`;
             } else {
-                return `<button onclick="alert('Contacting seller: ' + '${escapeHtml(item.seller)}')" class="btn-action" style="background:var(--primary); color:white;">
+                return `<button onclick="window.open('https://wa.me/?text=Hi%2C%20I%20am%20interested%20in%20your%20listing%20' + encodeURIComponent(item.title) + '%20on%20CampusCycle', '_blank')" class="btn-action" style="background:#25D366; color:white;">\n                            <i class="fa-brands fa-whatsapp"></i> WhatsApp Seller\n                        </button>`;\n            } else if (false) {\n                return `<button onclick="alert('Contacting seller: ' + '${escapeHtml(item.seller)}')" class="btn-action" style="background:var(--primary); color:white;">
                             <i class="fa-solid fa-envelope"></i> Contact
                         </button>`;
             }
